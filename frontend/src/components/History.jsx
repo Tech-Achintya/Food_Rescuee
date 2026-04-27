@@ -33,6 +33,10 @@ export default function History({ user }) {
     const fetchHistory = async () => {
       try {
         const allPackages = await get('/packages');
+        if (allPackages.error) {
+           console.error('Failed to fetch history:', allPackages.error);
+           return;
+        }
         // Filter packages created by this user (mess head)
         const userPackages = allPackages.filter(pkg => pkg.created_by === user.id);
         setPackages(userPackages);

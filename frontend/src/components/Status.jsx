@@ -8,7 +8,19 @@ export default function Status() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    get('/packages').then(setPackages);
+    const fetchPackages = async () => {
+      try {
+        const data = await get('/packages');
+        if (data.error) {
+          console.error('Failed to fetch packages:', data.error);
+        } else {
+          setPackages(data || []);
+        }
+      } catch (err) {
+        console.error('Error in Status fetch:', err);
+      }
+    };
+    fetchPackages();
   }, []);
 
   const handlePackageClick = async (pkg) => {

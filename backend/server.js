@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -9,8 +8,7 @@ const packageRoutes = require('./routes/packages');
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
-app.use('/auth', authRoutes);
+app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/food', foodRoutes);
 app.use('/api/packages', packageRoutes);

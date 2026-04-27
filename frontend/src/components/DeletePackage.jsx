@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { del } from "../api";
 
 const DeletePackage = () => {
   const [packageId, setPackageId] = useState("");
@@ -14,12 +14,12 @@ const DeletePackage = () => {
     }
 
     try {
-      const res = await axios.delete(`http://localhost:4000/api/packages/${packageId}`);
-      if (res.status === 200) {
+      const res = await del(`/packages/${packageId}`);
+      if (res.error) {
+        setMessage(`❌ Error: ${res.error}`);
+      } else {
         setMessage("✅ Package deleted successfully!");
         setPackageId("");
-      } else {
-        setMessage("❌ Failed to delete package. Try again.");
       }
     } catch (err) {
       console.error(err);

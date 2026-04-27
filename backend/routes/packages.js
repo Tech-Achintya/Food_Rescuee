@@ -8,9 +8,26 @@ router.delete("/:packageId", async (req, res) => {
   const { packageId } = req.params; // this is like "PKG-1761908124772"
 
   try {
-    const [result] = await pool.query(
-      "DELETE FROM packages WHERE package_code = ?",
+    // First, find the internal ID of the package
+    const [packages] = await pool.query(
+      "SELECT id FROM packages WHERE package_code = ?",
       [packageId]
+    );
+
+    if (packages.length === 0) {
+      return res.status(404).json({ message: "Package not found." });
+    }
+
+    const internalId = packages[0].id;
+
+    // Delete child records first
+    await pool.query("DELETE FROM deliveries WHERE package_id = ?", [internalId]);
+    await pool.query("DELETE FROM package_items WHERE package_id = ?", [internalId]);
+
+    // Finally, delete the package itself
+    const [result] = await pool.query(
+      "DELETE FROM packages WHERE id = ?",
+      [internalId]
     );
 
     if (result.affectedRows > 0) {
@@ -19,9 +36,8 @@ router.delete("/:packageId", async (req, res) => {
       res.status(404).json({ message: "Package not found." });
     }
   } catch (err) {
-
     console.error("Error deleting package:", err);
-    res.status(500).json({ message: "Server error deleting package." });
+    res.status(500).json({ message: "Server error deleting package: " + err.message });
   }
 });
 /** Create a package (mess head creates) with items array: [{food_item_id,quantity}] */

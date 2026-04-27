@@ -7,7 +7,24 @@ export default function NGOView({user}) {
   const [deliveryInfo, setDeliveryInfo] = useState({name:'', contact:'', arrival_time:''});
   const [loading, setLoading] = useState(false);
 
-  useEffect(()=>{ get('/packages').then(setPackages); },[]);
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setLoading(true);
+      try {
+        const data = await get('/packages');
+        if (data.error) {
+          console.error('Failed to fetch packages:', data.error);
+        } else {
+          setPackages(data || []);
+        }
+      } catch (err) {
+        console.error('Error fetching packages:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPackages();
+  }, []);
 
   const openAccept = (pkg) => { 
     setShowAcceptFor(pkg);
@@ -34,12 +51,21 @@ export default function NGOView({user}) {
         arrival_time: deliveryInfo.arrival_time
       };
       const res = await post(`/packages/${showAcceptFor.id}/accept`, payload);
+      
+      if (res.error) {
+        alert('❌ Failed to accept package: ' + res.error);
+        return;
+      }
+
       alert('✅ Package accepted successfully!');
       setShowAcceptFor(null);
       setDeliveryInfo({name:'', contact:'', arrival_time:''});
       // Refresh packages
-      get('/packages').then(setPackages);
+      get('/packages').then(data => {
+        if (!data.error) setPackages(data);
+      });
     } catch (error) {
+      console.error('Acceptance error:', error);
       alert('❌ Failed to accept package. Please try again.');
     } finally {
       setLoading(false);

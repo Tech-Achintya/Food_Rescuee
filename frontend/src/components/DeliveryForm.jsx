@@ -82,6 +82,11 @@ export default function DeliveryForm({ user }) {
         items
       });
 
+      if (res.error) {
+        alert('❌ Failed to create package: ' + res.error);
+        return;
+      }
+
       alert('Created package ' + res.package_code);
       // Optionally reset form
       setRows([{ type: 'VEG', category_id: '', item_id: '', quantity: 1 }]);
