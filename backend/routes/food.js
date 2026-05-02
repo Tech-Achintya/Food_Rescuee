@@ -1,38 +1,83 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db');
+const supabase = require('../db');
 
 /** Get all categories (veg/nonveg + category) */
 router.get('/categories', async (req,res) => {
-  const [rows] = await pool.query('SELECT * FROM food_categories');
-  res.json(rows);
+  try {
+    const { data: rows, error } = await supabase.from('food_categories').select('*');
+    if (error) throw error;
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 /** Add a category */
 router.post('/categories', async (req,res) => {
-  const { type, category } = req.body;
-  const [r] = await pool.query('INSERT INTO food_categories (type,category) VALUES (?,?)', [type,category]);
-  const [row] = await pool.query('SELECT * FROM food_categories WHERE id=?',[r.insertId]);
-  res.json(row[0]);
+  try {
+    const { type, category } = req.body;
+    const { data: row, error } = await supabase
+      .from('food_categories')
+      .insert([{ type, category }])
+      .select();
+    if (error) throw error;
+    res.json(row[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 /** Get items by category id or all */
 router.get('/items', async (req,res) => {
-  const { category_id } = req.query;
-  if (category_id) {
-    const [rows] = await pool.query('SELECT * FROM food_items WHERE category_id=?',[category_id]);
-    return res.json(rows);
+  try {
+    const { category_id } = req.query;
+    let query = supabase.from('food_items').select(`
+      *,
+      food_categories (
+        type,
+        category
+      )
+    `);
+    
+    if (category_id) {
+      query = query.eq('category_id', category_id);
+    }
+    
+    const { data: rows, error } = await query;
+    if (error) throw error;
+    
+    // Map data to match previous format if needed
+    const formattedRows = rows.map(item => ({
+      ...item,
+      type: item.food_categories?.type,
+      category_name: item.food_categories?.category
+    }));
+    
+    res.json(formattedRows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
-  const [rows] = await pool.query('SELECT fi.*, fc.type, fc.category AS category_name FROM food_items fi JOIN food_categories fc ON fi.category_id = fc.id');
-  res.json(rows);
 });
 
 /** Add food item */
 router.post('/items', async (req,res) => {
-  const { category_id, name } = req.body;
-  const [r] = await pool.query('INSERT INTO food_items (category_id,name) VALUES (?,?)', [category_id,name]);
-  const [row] = await pool.query('SELECT * FROM food_items WHERE id=?',[r.insertId]);
-  res.json(row[0]);
+  try {
+    const { category_id, name } = req.body;
+    const { data: row, error } = await supabase
+      .from('food_items')
+      .insert([{ category_id, name }])
+      .select();
+    if (error) throw error;
+    res.json(row[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
+

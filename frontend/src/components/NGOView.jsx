@@ -73,124 +73,124 @@ export default function NGOView({user}) {
   };
 
   const availablePackages = packages.filter(p=>p.status==='AVAILABLE');
+  const myAcceptedPackages = packages.filter(p=>p.status==='ACCEPTED' && p.accepted_by == user.id);
 
   return (
-    <div className="p-4 md:p-6">
-      {availablePackages.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="text-4xl mb-4">📦</div>
-          <h3 className="text-lg font-semibold text-gray-600 mb-2">No packages available</h3>
-          <p className="text-sm text-gray-500">Check back later for new food rescue opportunities</p>
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <span className="p-2 bg-green-100 rounded-lg">🥗</span> Available for Rescue
+          </h2>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="text-sm text-green-600 font-bold hover:underline"
+          >
+            Refresh List
+          </button>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {availablePackages.map(p=>(
-            <div key={p.id} className="bg-linear-to-r from-white to-gray-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
-              <div className="p-4">
-                <div className="flex flex-col lg:flex-row lg:justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+
+        {availablePackages.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-xl border-2 border-dashed border-gray-200">
+            <div className="text-5xl mb-4">📦</div>
+            <h3 className="text-lg font-semibold text-gray-600 mb-2">No packages currently available</h3>
+            <p className="text-sm text-gray-500">Check back later or try refreshing</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {availablePackages.map(p=>(
+              <div key={p.id} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+                <div className="p-5">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 uppercase tracking-wider mb-2">
                         {p.package_code}
                       </span>
-                      <span className="text-sm font-semibold text-gray-700">
-                        📍 {p.hostel_name}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-600 mb-3">
-                      <span className="font-medium">Items: </span>
-                      {p.items.map(i=>`${i.food_name} (${i.quantity})`).join(', ')}
-                    </div>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <span className="inline-flex items-center">
-                        🕒 Available for pickup
-                      </span>
+                      <h3 className="text-lg font-bold text-gray-800">📍 {p.hostel_name}</h3>
                     </div>
                   </div>
-                  <div className="flex items-start">
-                    {showAcceptFor && showAcceptFor.id === p.id ? (
-                      <button 
-                        onClick={closeAccept}
-                        className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200 font-medium text-sm"
-                      >
-                        Cancel
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={()=>openAccept(p)} 
-                        className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-all duration-200 font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105 flex items-center gap-2"
-                      >
-                        <span>✓</span>
-                        Accept Package
-                      </button>
-                    )}
+                  
+                  <div className="space-y-3 mb-6">
+                    <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                      <span className="font-bold block mb-1 text-gray-700">📦 Items:</span>
+                      {p.items?.map(i=>`${i.food_name} (${i.quantity})`).join(', ') || 'No items listed'}
+                    </div>
                   </div>
+
+                  {showAcceptFor && showAcceptFor.id === p.id ? (
+                    <div className="space-y-4">
+                      <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                        <h4 className="font-bold text-green-800 mb-3 text-sm">🚚 Enter Delivery Details</h4>
+                        <div className="space-y-3">
+                          <input 
+                            placeholder="Delivery Person Name" 
+                            value={deliveryInfo.name} 
+                            onChange={e=>setDeliveryInfo({...deliveryInfo,name:e.target.value})} 
+                            className="w-full p-2.5 bg-white border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-hidden text-sm"
+                          />
+                          <input 
+                            placeholder="Contact Number" 
+                            value={deliveryInfo.contact} 
+                            onChange={e=>setDeliveryInfo({...deliveryInfo,contact:e.target.value})} 
+                            className="w-full p-2.5 bg-white border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-hidden text-sm"
+                          />
+                          <input 
+                            type="datetime-local" 
+                            value={deliveryInfo.arrival_time} 
+                            onChange={e=>setDeliveryInfo({...deliveryInfo,arrival_time:e.target.value})} 
+                            className="w-full p-2.5 bg-white border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 outline-hidden text-sm"
+                          />
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                          <button 
+                            onClick={submitAccept} 
+                            disabled={loading}
+                            className="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-sm"
+                          >
+                            {loading ? 'Processing...' : 'Confirm Acceptance'}
+                          </button>
+                          <button 
+                            onClick={closeAccept}
+                            className="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold text-sm"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={()=>openAccept(p)} 
+                      className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-sm shadow-md transition-all active:scale-95"
+                    >
+                      Accept Package
+                    </button>
+                  )}
                 </div>
-                
-                {showAcceptFor && showAcceptFor.id === p.id && (
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg border-t border-gray-200">
-                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                      🚚 Delivery Information
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Delivery Person Name</label>
-                        <input 
-                          placeholder="Enter full name" 
-                          value={deliveryInfo.name} 
-                          onChange={e=>setDeliveryInfo({...deliveryInfo,name:e.target.value})} 
-                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Contact Number</label>
-                        <input 
-                          placeholder="Phone number" 
-                          value={deliveryInfo.contact} 
-                          onChange={e=>setDeliveryInfo({...deliveryInfo,contact:e.target.value})} 
-                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Arrival Time</label>
-                        <input 
-                          type="datetime-local" 
-                          value={deliveryInfo.arrival_time} 
-                          onChange={e=>setDeliveryInfo({...deliveryInfo,arrival_time:e.target.value})} 
-                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-sm"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2 mt-4">
-                      <button 
-                        onClick={submitAccept} 
-                        disabled={loading}
-                        className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                      >
-                        {loading ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <span>📋</span>
-                            Confirm Acceptance
-                          </>
-                        )}
-                      </button>
-                      <button 
-                        onClick={closeAccept}
-                        className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200 font-medium"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
+      </div>
+
+      {myAcceptedPackages.length > 0 && (
+        <div className="mt-12 border-t pt-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <span className="p-2 bg-blue-100 rounded-lg">🚚</span> Your Accepted Packages
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {myAcceptedPackages.map(p => (
+              <div key={p.id} className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex justify-between items-center shadow-sm">
+                <div>
+                  <div className="text-xs font-bold text-blue-600 uppercase">{p.package_code}</div>
+                  <div className="font-bold text-gray-800">{p.hostel_name}</div>
+                </div>
+                <div className="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-full">
+                  ACCEPTED
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

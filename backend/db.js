@@ -1,24 +1,15 @@
-const mysql = require('mysql2/promise');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'food_rescue',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 
-module.exports = pool;
+if (!supabaseUrl || !supabaseKey) {
+  console.warn('⚠️ Missing Supabase environment variables. Please check your .env file.');
+}
 
-(async () => {
-  try {
-    const connection = await pool.getConnection();
-    console.log('✅ Connected to MySQL Database!');
-    connection.release();
-  } catch (err) {
-    console.error('❌ MySQL Connection Error:', err.message);
-  }
-})();
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+module.exports = supabase;
+
+console.log('✅ Supabase client initialized!');
